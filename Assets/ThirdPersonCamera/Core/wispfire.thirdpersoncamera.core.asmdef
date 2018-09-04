@@ -1,0 +1,8 @@
+{
+    "name": "Wispfire.CameraSystems.ThirdPersonCamera",
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

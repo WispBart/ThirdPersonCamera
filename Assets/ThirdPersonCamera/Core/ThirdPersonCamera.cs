@@ -61,6 +61,7 @@ namespace Wispfire.Cameras.ThirdPerson
             Distance = ProcessValue(Distance, _distanceProcessors);
             OffsetLateral = ProcessValue(OffsetLateral, _offsetLProcessors);
             OffsetVertical = ProcessValue(OffsetVertical, _offsetVProcessors);
+            FieldOfView = ProcessValue(FieldOfView, _fovProcessors);
             
             CalculatePosition();
         }
@@ -108,7 +109,8 @@ namespace Wispfire.Cameras.ThirdPerson
             = new SortedSet<CameraProcessor<OffsetLateral>>(Comparer<CameraProcessor<OffsetLateral>>.Create((x,y) => x.Order.CompareTo(y.Order)));
         private SortedSet<CameraProcessor<OffsetVertical>> _offsetVProcessors
             = new SortedSet<CameraProcessor<OffsetVertical>>(Comparer<CameraProcessor<OffsetVertical>>.Create((x,y) => x.Order.CompareTo(y.Order)));
-
+        private SortedSet<CameraProcessor<FieldOfView>> _fovProcessors
+            = new SortedSet<CameraProcessor<FieldOfView>>(Comparer<CameraProcessor<FieldOfView>>.Create((x,y) => x.Order.CompareTo(y.Order)));
 
         public bool Register(CameraProcessor<Pitch> processor) => _pitchProcessors.Add(processor);
         public bool Register(CameraProcessor<Yaw> processor) => _yawProcessors.Add(processor);
@@ -116,6 +118,7 @@ namespace Wispfire.Cameras.ThirdPerson
         public bool Register(CameraProcessor<Distance> processor) => _distanceProcessors.Add(processor);
         public bool Register(CameraProcessor<OffsetLateral> processor) => _offsetLProcessors.Add(processor);
         public bool Register(CameraProcessor<OffsetVertical> processor) => _offsetVProcessors.Add(processor);
+        public bool Register(CameraProcessor<FieldOfView> processsor) => _fovProcessors.Add(processsor);
 
         public bool Unregister(CameraProcessor<Pitch> processor) => _pitchProcessors.Remove(processor);
         public bool Unregister(CameraProcessor<Yaw> processor) => _yawProcessors.Remove(processor);
@@ -123,6 +126,7 @@ namespace Wispfire.Cameras.ThirdPerson
         public bool Unregister(CameraProcessor<Distance> processor) => _distanceProcessors.Remove(processor);
         public bool Unregister(CameraProcessor<OffsetLateral> processor) => _offsetLProcessors.Remove(processor);
         public bool Unregister(CameraProcessor<OffsetVertical> processor) => _offsetVProcessors.Remove(processor);
+        public bool Unregister(CameraProcessor<FieldOfView> processor) => _fovProcessors.Remove(processor);
 
     }
 

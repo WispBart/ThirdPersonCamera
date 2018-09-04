@@ -1,0 +1,11 @@
+{
+    "name": "ThirdPersonCamera.Cinemachine",
+    "references": [
+        "Wispfire.CameraSystems.ThirdPersonCamera",
+        "Cinemachine"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

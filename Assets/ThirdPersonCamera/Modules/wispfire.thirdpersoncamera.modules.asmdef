@@ -1,0 +1,11 @@
+{
+    "name": "ThirdPersonCamera.Modules",
+    "references": [
+        "Wispfire.CameraSystems.ThirdPersonCamera",
+        "Unity.Mathematics"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
