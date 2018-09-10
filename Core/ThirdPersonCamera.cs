@@ -52,8 +52,7 @@ namespace Wispfire.Cameras.ThirdPerson
         
         private Vector3 _lookAtPosition;
 
-
-        void Update()
+        public void CalculateValues()
         {
             Pitch = ProcessValue(_pitch, _pitchProcessors);
             Yaw = ProcessValue(_yaw, _yawProcessors);
@@ -61,12 +60,13 @@ namespace Wispfire.Cameras.ThirdPerson
             Distance = ProcessValue(Distance, _distanceProcessors);
             OffsetLateral = ProcessValue(OffsetLateral, _offsetLProcessors);
             OffsetVertical = ProcessValue(OffsetVertical, _offsetVProcessors);
-            FieldOfView = ProcessValue(FieldOfView, _fovProcessors);
-            
-            CalculatePosition();
+            FieldOfView = ProcessValue(FieldOfView, _fovProcessors);            
+            CalculatePositionAndRotation();
+            Position = PostProcessPosition(Position, _positionPostProcessors);
+            Rotation = PostProcessRotation(Rotation, _rotationPostProcessors);
         }
 
-        float ProcessValue<T>(float startValue, IEnumerable<CameraProcessor<T>> list) where T : CameraValue
+        private float ProcessValue<T>(float startValue, IEnumerable<CameraProcessor<T>> list) where T : CameraValue
         {
             var value = startValue;
             foreach (var item in list)
@@ -76,8 +76,27 @@ namespace Wispfire.Cameras.ThirdPerson
             return value;
         }
 
+        private Vector3 PostProcessPosition(Vector3 startValue, IEnumerable<CameraPositionPostProcessor> list)
+        {
+            var value = startValue;
+            foreach (var item in list)
+            {
+                value = item.Process(value);
+            }
+            return value;
+        }
 
-        public void CalculatePosition()
+        private Quaternion PostProcessRotation(Quaternion startValue, IEnumerable<CameraRotationPostProcessor> list)
+        {
+            var value = startValue;
+            foreach (var item in list)
+            {
+                value = item.Process(value);
+            }
+            return value;
+        }
+
+        private void CalculatePositionAndRotation()
         {
             // Calculate final Position & Rotation
             _lookAtPosition = LookAt.position;
@@ -111,7 +130,11 @@ namespace Wispfire.Cameras.ThirdPerson
             = new SortedSet<CameraProcessor<OffsetVertical>>(Comparer<CameraProcessor<OffsetVertical>>.Create((x,y) => x.Order.CompareTo(y.Order)));
         private SortedSet<CameraProcessor<FieldOfView>> _fovProcessors
             = new SortedSet<CameraProcessor<FieldOfView>>(Comparer<CameraProcessor<FieldOfView>>.Create((x,y) => x.Order.CompareTo(y.Order)));
-
+        private SortedSet<CameraPositionPostProcessor> _positionPostProcessors
+            = new SortedSet<CameraPositionPostProcessor>(Comparer<CameraPositionPostProcessor>.Create((x,y) => x.Order.CompareTo(y.Order)));
+        private SortedSet<CameraRotationPostProcessor> _rotationPostProcessors
+            = new SortedSet<CameraRotationPostProcessor>(Comparer<CameraRotationPostProcessor>.Create((x,y) => x.Order.CompareTo(y.Order)));
+        
         public bool Register(CameraProcessor<Pitch> processor) => _pitchProcessors.Add(processor);
         public bool Register(CameraProcessor<Yaw> processor) => _yawProcessors.Add(processor);
         public bool Register(CameraProcessor<Roll> processor) => _rollProcessors.Add(processor);
@@ -119,6 +142,8 @@ namespace Wispfire.Cameras.ThirdPerson
         public bool Register(CameraProcessor<OffsetLateral> processor) => _offsetLProcessors.Add(processor);
         public bool Register(CameraProcessor<OffsetVertical> processor) => _offsetVProcessors.Add(processor);
         public bool Register(CameraProcessor<FieldOfView> processsor) => _fovProcessors.Add(processsor);
+        public bool Register(CameraPositionPostProcessor processor) => _positionPostProcessors.Add(processor);
+        public bool Register(CameraRotationPostProcessor processor) => _rotationPostProcessors.Add(processor);
 
         public bool Unregister(CameraProcessor<Pitch> processor) => _pitchProcessors.Remove(processor);
         public bool Unregister(CameraProcessor<Yaw> processor) => _yawProcessors.Remove(processor);
@@ -127,14 +152,36 @@ namespace Wispfire.Cameras.ThirdPerson
         public bool Unregister(CameraProcessor<OffsetLateral> processor) => _offsetLProcessors.Remove(processor);
         public bool Unregister(CameraProcessor<OffsetVertical> processor) => _offsetVProcessors.Remove(processor);
         public bool Unregister(CameraProcessor<FieldOfView> processor) => _fovProcessors.Remove(processor);
-
+        public bool Unregister(CameraPositionPostProcessor processor) => _positionPostProcessors.Remove(processor);
+        public bool Unregister(CameraRotationPostProcessor processor) => _rotationPostProcessors.Remove(processor);
     }
 
+    /// <summary>
+    /// Allows a camera value (e.g. yaw, pitch, FoV) to be processed. Values are processed in the defined order.
+    /// If the order is changed during runtime, the processor should be unregistered and then registered again with the ThirdPersonCamera.
+    /// </summary>
+    /// <typeparam name="T">One of the interface types defined in CameraValues.cs</typeparam>
     public interface CameraProcessor<T> where T : CameraValue
     {
         float Process(float value);
         int Order { get; }
     }
-    
+
+    /// <summary>
+    /// Allows camera position to be modified directly after base position has been calculated, but before it is applied to the transform.
+    /// </summary>
+    public interface CameraPositionPostProcessor
+    {
+        Vector3 Process(Vector3 value);
+        int Order { get; }
+    }
+    /// <summary>
+    /// Allows camera rotation to be modified directly after base rotation has been calculated, but before it is applied to the transform.
+    /// </summary>
+    public interface CameraRotationPostProcessor
+    {
+        Quaternion Process(Quaternion value);
+        int Order { get; }
+    }
 }
 

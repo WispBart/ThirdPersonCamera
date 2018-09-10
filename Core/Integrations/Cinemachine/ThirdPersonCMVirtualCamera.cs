@@ -15,6 +15,7 @@ namespace Wispfire.Cameras.ThirdPerson
 		
 		void LateUpdate()
 		{
+			_thirdPersonCamera.CalculateValues();
 			transform.position = _thirdPersonCamera.Position;
 			transform.rotation = _thirdPersonCamera.Rotation;
 			TargetCamera.m_Lens.FieldOfView = _thirdPersonCamera.FieldOfView;
